@@ -17,6 +17,8 @@ uint8_t txValue = 0x41;
 #define CHARACTERISTIC_UUID_RX "6E400002-B5A3-F393-E0A9-E50E24DCCA9E"
 #define CHARACTERISTIC_UUID_TX "6E400003-B5A3-F393-E0A9-E50E24DCCA9E"
 
+#define controlPin 23
+
 
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
@@ -31,6 +33,13 @@ class MyServerCallbacks: public BLEServerCallbacks {
 class MyCallbacks: public BLECharacteristicCallbacks {
     void onWrite(BLECharacteristic *pCharacteristic) {
       std::string rxValue = pCharacteristic->getValue();
+
+      if (rxValue == "ON") {
+        digitalWrite(controlPin, HIGH);
+      }
+      if (rxValue == "OFF") {
+        digitalWrite(controlPin, LOW);
+      }
 
       if (rxValue.length() > 0) {
         Serial.println("*********");
@@ -50,8 +59,10 @@ void setup() {
   delay(2000);
   Serial.println("starting....");
 
+  pinMode(controlPin, OUTPUT);
+
   // Create the BLE Device
-  BLEDevice::init("UART Service");
+  BLEDevice::init("RELAY CONTROLLER");
 
   // Create the BLE Server
   pServer = BLEDevice::createServer();
